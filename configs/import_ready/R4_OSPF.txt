@@ -1,0 +1,26 @@
+no router rip
+hostname R4
+no ip domain-lookup
+interface GigabitEthernet0/0
+ description LAN-B-SW2
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+ exit
+interface GigabitEthernet0/1
+ description TO-R2
+ ip address 10.0.24.2 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet0/2
+ description TO-R5
+ ip address 10.0.45.2 255.255.255.252
+ no shutdown
+ exit
+
+router ospf 1
+ router-id 4.4.4.4
+ network 10.0.0.0 0.255.255.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ passive-interface GigabitEthernet0/0
+ exit
+end

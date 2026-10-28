@@ -1,0 +1,10 @@
+enable
+configure terminal
+interface GigabitEthernet0/0
+ ip ospf cost 100
+exit
+interface GigabitEthernet0/1
+ ip ospf cost 100
+exit
+end
+write memory

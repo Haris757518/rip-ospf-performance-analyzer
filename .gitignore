@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.log
+
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+dashboard/app_previous.py
+

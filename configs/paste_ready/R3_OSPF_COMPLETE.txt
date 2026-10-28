@@ -1,0 +1,25 @@
+enable
+configure terminal
+hostname R3
+no ip domain-lookup
+interface GigabitEthernet0/0
+ description TO-R1
+ ip address 10.0.13.2 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet0/1
+ description TO-R5
+ ip address 10.0.35.1 255.255.255.252
+ no shutdown
+ exit
+end
+write memory
+
+enable
+configure terminal
+router ospf 1
+ router-id 3.3.3.3
+ network 10.0.0.0 0.255.255.255 area 0
+ exit
+end
+write memory

@@ -1,0 +1,21 @@
+enable
+configure terminal
+hostname R4
+no ip domain-lookup
+interface GigabitEthernet0/0
+ description LAN-B-SW2
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+ exit
+interface GigabitEthernet0/1
+ description TO-R2
+ ip address 10.0.24.2 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet0/2
+ description TO-R5
+ ip address 10.0.45.2 255.255.255.252
+ no shutdown
+ exit
+end
+write memory

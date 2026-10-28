@@ -1,0 +1,206 @@
+Building configuration...
+[OK]
+R1#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to up
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1>enable
+R1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     192.168.10.1    YES manual up                    up 
+GigabitEthernet0/1     10.0.12.1       YES manual up                    up 
+GigabitEthernet0/2     10.0.13.1       YES manual up                    up 
+Vlan1                  unassigned      YES unset  administratively down down
+R1#show ip route 192.168.20.0
+Routing entry for 192.168.20.0/24
+Known via "rip", distance 120, metric 2
+  Redistributing via rip
+  Last update from 10.0.12.2 on GigabitEthernet0/1, 00:00:07 ago
+  Routing Descriptor Blocks:
+  * 10.0.12.2, from 10.0.12.2, 00:00:07 ago, via GigabitEthernet0/1
+      Route metric is 2, traffic share count is 1
+
+R1#show ip route 192.168.20.0
+Routing entry for 192.168.20.0/24
+Known via "rip", distance 120, metric 3
+  Redistributing via rip
+  Last update from 10.0.13.2 on GigabitEthernet0/2, 00:00:22 ago
+  Routing Descriptor Blocks:
+  * 10.0.13.2, from 10.0.13.2, 00:00:22 ago, via GigabitEthernet0/2
+      Route metric is 3, traffic share count is 1
+
+R1#
+?Bad filename
+%Error parsing filename (Bad file number)
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1>enable
+R1#copy running-config startup-config
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R1#
+00:45:29: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on GigabitEthernet0/1 from LOADING to FULL, Loading Done
+
+00:47:49: %OSPF-5-ADJCHG: Process 1, Nbr 3.3.3.3 on GigabitEthernet0/2 from LOADING to FULL, Loading Done
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1 con0 is now available
+
+
+
+
+
+
+Press RETURN to get started.
+
+
+
+
+
+
+
+
+
+
+
+
+
+R1>show ip route 192.168.20.0
+Routing entry for 192.168.20.0/24
+Known via "ospf 1", distance 110, metric 3, type intra area
+  Last update from 10.0.12.2 on GigabitEthernet0/1, 00:05:57 ago
+  Routing Descriptor Blocks:
+  * 10.0.12.2, from 4.4.4.4, 00:05:57 ago, via GigabitEthernet0/1
+      Route metric is 3, traffic share count is 1
+
+R1>show ip ospf neighbor
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           1   FULL/BDR        00:00:35    10.0.13.2       GigabitEthernet0/2
+2.2.2.2           1   FULL/BDR        00:00:37    10.0.12.2       GigabitEthernet0/1
+R1>

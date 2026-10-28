@@ -1,0 +1,6 @@
+protocol,experiment,trial,measurement_basis,convergence_s,sent_packets,received_packets,route_hops,route_path,evidence_note
+RIP,baseline,1,Packet Tracer steady-state verification,,4,4,2,R1 -> R2 -> R4,experiments/evidence/RIP_PC0_existing_ping.txt; baseline route also retained in RIP_R1_failover.txt
+RIP,failover,1,Packet Tracer steady-state verification,,4,4,3,R1 -> R3 -> R5 -> R4,experiments/evidence/RIP_PC0_failover_trace.txt; ping after convergence only
+OSPF,baseline,1,Packet Tracer steady-state verification,,4,4,2,R1 -> R2 -> R4,experiments/evidence/OSPF_PC0_baseline_ping.txt; OSPF_R1_baseline.txt
+OSPF,failover,1,Packet Tracer steady-state verification,,4,4,3,R1 -> R3 -> R5 -> R4,experiments/evidence/OSPF_PC0_failover_ping.txt; OSPF_R1_failover.txt; ping after convergence only
+OSPF,recovery,1,Packet Tracer routing-table verification,,,,2,R1 -> R2 -> R4,experiments/evidence/OSPF_R1_recovery.txt; restored next hop 10.0.12.2 and OSPF cost 3; packet counts not collected

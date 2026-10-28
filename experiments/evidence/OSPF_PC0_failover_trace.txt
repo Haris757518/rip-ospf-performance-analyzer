@@ -1,0 +1,82 @@
+Cisco Packet Tracer PC Command Line 1.0
+C:\>ping 192.168.20.10
+
+Pinging 192.168.20.10 with 32 bytes of data:
+
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time=1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+
+Ping statistics for 192.168.20.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 1ms, Average = 0ms
+
+C:\>ping 192.168.20.10
+
+Pinging 192.168.20.10 with 32 bytes of data:
+
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+
+Ping statistics for 192.168.20.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>tracert 192.168.20.10
+
+Tracing route to 192.168.20.10 over a maximum of 30 hops: 
+
+  1   0 ms      0 ms      0 ms      192.168.10.1
+  2   0 ms      0 ms      0 ms      10.0.13.2
+  3   0 ms      0 ms      0 ms      10.0.35.2
+  4   0 ms      0 ms      0 ms      10.0.45.2
+  5   0 ms      0 ms      0 ms      192.168.20.10
+
+Trace complete.
+
+C:\>ping 192.168.20.10
+
+Pinging 192.168.20.10 with 32 bytes of data:
+
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=125
+
+Ping statistics for 192.168.20.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+
+C:\>ping 192.168.20.10
+
+Pinging 192.168.20.10 with 32 bytes of data:
+
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+Reply from 192.168.20.10: bytes=32 time=3ms TTL=124
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+Reply from 192.168.20.10: bytes=32 time<1ms TTL=124
+
+Ping statistics for 192.168.20.10:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 3ms, Average = 0ms
+
+C:\>tracert 192.168.20.10
+
+Tracing route to 192.168.20.10 over a maximum of 30 hops: 
+
+  1   0 ms      0 ms      0 ms      192.168.10.1
+  2   0 ms      0 ms      0 ms      10.0.13.2
+  3   0 ms      0 ms      0 ms      10.0.35.2
+  4   0 ms      0 ms      0 ms      10.0.45.2
+  5   0 ms      0 ms      0 ms      192.168.20.10
+
+Trace complete.
+
+C:\>

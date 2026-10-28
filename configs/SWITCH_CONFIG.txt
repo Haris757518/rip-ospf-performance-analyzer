@@ -1,0 +1,8 @@
+Switches 2960 do NOT need any configuration for this basic project. Connect:
+PC-A FastEthernet0 <-> SW1 FastEthernet0/1
+SW1 FastEthernet0/2 <-> R1 GigabitEthernet0/0
+PC-B FastEthernet0 <-> SW2 FastEthernet0/1
+SW2 FastEthernet0/2 <-> R4 GigabitEthernet0/0
+All five router-to-router links use the port pairs in TOPOLOGY_AND_PORTS.md.
+Use Packet Tracer automatic cabling or copper straight-through between PCs/switches;
+for directly connected routers choose the appropriate working copper cable or auto-connect.

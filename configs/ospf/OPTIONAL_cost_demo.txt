@@ -1,0 +1,60 @@
+! Apply ONLY for the separate OSPF metric scenario, AFTER baseline and failover tests.
+! Top path: outbound cost 100 per link; lower path: outbound cost 10 per link.
+! Paste each device's corresponding section on that device.
+! R1
+configure terminal
+interface GigabitEthernet0/1
+ ip ospf cost 100
+exit
+interface GigabitEthernet0/2
+ ip ospf cost 10
+exit
+end
+write memory
+
+! R2
+configure terminal
+interface GigabitEthernet0/0
+ ip ospf cost 100
+exit
+interface GigabitEthernet0/1
+ ip ospf cost 100
+exit
+end
+write memory
+
+! R3
+configure terminal
+interface GigabitEthernet0/0
+ ip ospf cost 10
+exit
+interface GigabitEthernet0/1
+ ip ospf cost 10
+exit
+end
+write memory
+
+! R5
+configure terminal
+interface GigabitEthernet0/0
+ ip ospf cost 10
+exit
+interface GigabitEthernet0/1
+ ip ospf cost 10
+exit
+end
+write memory
+
+! R4
+configure terminal
+interface GigabitEthernet0/1
+ ip ospf cost 100
+exit
+interface GigabitEthernet0/2
+ ip ospf cost 10
+exit
+end
+write memory
+
+! To remove each custom interface cost later:
+! configure terminal > interface GigabitEthernet0/1 > no ip ospf cost > end
