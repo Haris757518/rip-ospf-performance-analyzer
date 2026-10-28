@@ -2,7 +2,7 @@
 
 **Project:** Performance Analysis of Distance Vector and Link State Routing Protocols Using Cisco Packet Tracer and a Python Streamlit Dashboard.
 
-**Delivery status (2026-10-26):** `RIP_Experiment.pkt` and `OSPF_Experiment.pkt` are built and saved. Baseline and settled failover connectivity were verified for both protocols; each four-packet probe delivered 4/4 packets. OSPF restoration to the primary route was also verified. Both files were saved with the R2–R4 link restored. The dashboard loads five recorded observations from `data/measured_results.csv`; source console transcripts and scope limitations are in [the verification record](experiments/VERIFIED_RESULTS.md). All **33 automated software tests pass**. **Repeated benchmarking, convergence timings, the separate Cisco cost demonstration, and final report/presentation evidence remain unfinished.**
+**Delivery status (2026-10-26):** `RIP_Experiment.pkt` and `OSPF_Experiment.pkt` are built and saved. Baseline and settled failover connectivity were verified for both protocols; each four-packet probe delivered 4/4 packets. OSPF restoration to the primary route was also verified. Both files were saved with the R2–R4 link restored. The dashboard loads five recorded observations from `data/measured_results.csv`; source console transcripts and scope limitations are in [the verification record](experiments/VERIFIED_RESULTS.md). All **36 automated software tests pass**. **Repeated benchmarking, convergence timings, the separate Cisco cost demonstration, and final report/presentation evidence remain unfinished.**
 
 ## Start in less than five steps
 1. Extract the entire ZIP (do not run from inside the ZIP).
@@ -90,3 +90,9 @@ The supplied V2 engine is now integrated into the visual dashboard, alongside th
 Engine source: dashboard/engine.py. UI: dashboard/labs.py. Measurement adapter: dashboard/measurements.py. The V2 experiment procedure is experiments/V2_EXPERIMENT_PROTOCOL.md; docs/UPGRADED_PROBLEM_AND_EXPERIMENT_DESIGN.md is a design template, not a completed empirical report. Existing actual findings remain in experiments/VERIFIED_RESULTS.md.
 
 Model stabilization means the first final delivered source path retained through the remainder of the observation window, not global control-plane convergence. Ticks are not seconds. Update counts omit OSPF normal background traffic and cannot rank total real overhead. Repeated transition measurements and defensible Cisco timings still require collection.
+
+## Enterprise WAN extension
+
+The default Enterprise WAN view now compares 12 routers over 18 redundant links. WAN-cost mode shows RIP's two-hop cost-24 legacy path versus OSPF's four-hop cost-8 core path. Equal-cost mode supports matched failure comparison. See docs/ENTERPRISE_PERFORMANCE_DEMO.md for the demo and Cisco build plan, docs/ENTERPRISE_WAN_LINK_PLAN.csv for addressing, and data/ABSTRACT_ENTERPRISE_SCENARIOS.csv for reproducible labeled model outputs. The existing Cisco projects and captures remain five-router observations; the enterprise topology has not been built or measured in Cisco. All 36 automated checks pass.
+
+

@@ -9,8 +9,8 @@ APP = Path(__file__).resolve().parents[1] / 'dashboard' / 'app.py'
 def test_dashboard_filters_recorded_results():
     app = AppTest.from_file(str(APP)).run(timeout=30)
     assert not app.exception
-    assert len(app.tabs) == 6
-    assert len(app.get('plotly_chart')) == 10
+    assert len(app.tabs) == 7
+    assert len(app.get('plotly_chart')) == 12
     app.radio(key='performance_scenario').set_value('Restored').run(timeout=30)
     assert not app.exception
     assert any('No packet probe' in item.value for item in app.info)

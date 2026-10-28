@@ -18,6 +18,7 @@ LABELS={'baseline':'Baseline','failover':'Link failure','recovery':'Restored','c
 
 from measurements import read_data
 from labs import settings, failure_lab, scaling_lab, decisions_lab
+from enterprise import enterprise_lab
 
 def style_chart(fig):
     fig.update_layout(height=310,margin=dict(l=10,r=10,t=25,b=10),paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)',font=dict(family='Arial',color='#b9cada',size=12),legend=dict(orientation='h',y=1.17,x=0),xaxis=dict(showgrid=False,zeroline=False),yaxis=dict(gridcolor='#28394b',zeroline=False),hoverlabel=dict(bgcolor='#182638',font_color='#fff'),bargap=.4,transition=dict(duration=450))
@@ -27,11 +28,13 @@ def section(kicker,title,detail=''):
     st.markdown(f'<div class="section-head"><span>{kicker}</span><h3>{title}</h3><p>{detail}</p></div>',unsafe_allow_html=True)
 
 data=read_data(ROOT/'data/measured_results.csv')
-st.markdown('''<div class="masthead"><div class="brand"><b>◈</b> ROUTE<span>LAB</span><i>NETWORK SYSTEMS / V2</i></div><div class="status"><em></em> CISCO EXPERIMENTS SAVED</div></div><div class="hero"><div class="eyebrow">COMPUTER NETWORKS · PROTOCOL BENCHMARK</div><h1>Performance analysis<span>RIP <i>versus</i> OSPF.</span></h1><p>One network. Two routing strategies. See the difference.</p><div class="hero-orbit">◎</div></div>''',unsafe_allow_html=True)
-failure,lab,scaling,decisions,performance,cisco=st.tabs(['↯ Failure Lab','◈ Routing Lab','↗ Scalability','◇ Decisions','▥ Cisco Results','↗ Cisco Workspace'])
+st.markdown('''<div class="masthead"><div class="brand"><b>◈</b> ROUTE<span>LAB</span><i>NETWORK SYSTEMS / ENTERPRISE</i></div><div class="status"><em></em> CISCO EXPERIMENTS SAVED</div></div><div class="hero"><div class="eyebrow">COMPUTER NETWORKS · PROTOCOL BENCHMARK</div><h1>Performance analysis<span>RIP <i>versus</i> OSPF.</span></h1><p>One network. Two routing strategies. See the difference.</p><div class="hero-orbit">◎</div></div>''',unsafe_allow_html=True)
+enterprise,failure,lab,scaling,decisions,performance,cisco=st.tabs(['◈ Enterprise WAN','↯ Failure Lab','◈ Routing Lab','↗ Scalability','◇ Decisions','▥ Cisco Results','↗ Cisco Workspace'])
 with failure:
     parameters=settings()
     failure_lab(style_chart,section,parameters)
+with enterprise:
+    enterprise_lab(style_chart,section,parameters)
 with scaling:
     scaling_lab(style_chart,section,parameters)
 with decisions:
