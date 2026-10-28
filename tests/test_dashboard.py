@@ -49,3 +49,17 @@ def test_model_state_and_scaling_controls():
     app.selectbox(key='decision_priority').set_value('Control events').run(timeout=30)
     assert not app.exception
     assert any('prevents a real-overhead' in item.value for item in app.info)
+
+
+def test_enterprise_path_failure_selection():
+    app = AppTest.from_file(str(APP)).run(timeout=30)
+    app.selectbox(key='enterprise_path').set_value('Core backup route').run(timeout=30)
+    assert not app.exception
+    assert 'R5–R11' in app.selectbox(key='enterprise_link').options
+    assert 'R2–R12' not in app.selectbox(key='enterprise_link').options
+    app.selectbox(key='enterprise_link').set_value('R5–R11')
+    app.button(key='enterprise_apply_failure').click().run(timeout=30)
+    assert not app.exception
+    assert any('R5–R11 failed in the model' in x.value for x in app.success)
+    app.selectbox(key='enterprise_path').set_value('Any WAN link').run(timeout=30)
+    assert len(app.selectbox(key='enterprise_link').options)==18

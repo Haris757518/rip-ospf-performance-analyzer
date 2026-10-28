@@ -2,7 +2,7 @@
 
 **Project:** Performance Analysis of Distance Vector and Link State Routing Protocols Using Cisco Packet Tracer and a Python Streamlit Dashboard.
 
-**Delivery status (2026-10-26):** `RIP_Experiment.pkt` and `OSPF_Experiment.pkt` are built and saved. Baseline and settled failover connectivity were verified for both protocols; each four-packet probe delivered 4/4 packets. OSPF restoration to the primary route was also verified. Both files were saved with the R2–R4 link restored. The dashboard loads five recorded observations from `data/measured_results.csv`; source console transcripts and scope limitations are in [the verification record](experiments/VERIFIED_RESULTS.md). All **36 automated software tests pass**. **Repeated benchmarking, convergence timings, the separate Cisco cost demonstration, and final report/presentation evidence remain unfinished.**
+**Delivery status (2026-10-26):** `RIP_Experiment.pkt` and `OSPF_Experiment.pkt` are built and saved. Baseline and settled failover connectivity were verified for both protocols; each four-packet probe delivered 4/4 packets. OSPF restoration to the primary route was also verified. Both files were saved with the R2–R4 link restored. The dashboard loads five recorded observations from `data/measured_results.csv`; source console transcripts and scope limitations are in [the verification record](experiments/VERIFIED_RESULTS.md). All **37 automated software tests pass**. **Repeated benchmarking, convergence timings, the separate Cisco cost demonstration, and final report/presentation evidence remain unfinished.**
 
 ## Start in less than five steps
 1. Extract the entire ZIP (do not run from inside the ZIP).
@@ -93,6 +93,7 @@ Model stabilization means the first final delivered source path retained through
 
 ## Enterprise WAN extension
 
-The default Enterprise WAN view now compares 12 routers over 18 redundant links. WAN-cost mode shows RIP's two-hop cost-24 legacy path versus OSPF's four-hop cost-8 core path. Equal-cost mode supports matched failure comparison. See docs/ENTERPRISE_PERFORMANCE_DEMO.md for the demo and Cisco build plan, docs/ENTERPRISE_WAN_LINK_PLAN.csv for addressing, and data/ABSTRACT_ENTERPRISE_SCENARIOS.csv for reproducible labeled model outputs. The existing Cisco projects and captures remain five-router observations; the enterprise topology has not been built or measured in Cisco. All 36 automated checks pass.
+The default Enterprise WAN view now compares 12 routers over 18 redundant links. WAN-cost mode shows RIP's two-hop cost-24 legacy path versus OSPF's four-hop cost-8 core path. Equal-cost mode supports matched failure comparison. See docs/ENTERPRISE_PERFORMANCE_DEMO.md for the demo and Cisco build plan, docs/ENTERPRISE_WAN_LINK_PLAN.csv for addressing, and data/ABSTRACT_ENTERPRISE_SCENARIOS.csv for reproducible labeled model outputs. The existing Cisco projects and captures remain five-router observations; the enterprise topology has not been built or measured in Cisco. All 37 automated checks pass.
+
 
 

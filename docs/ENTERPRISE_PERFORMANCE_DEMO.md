@@ -33,3 +33,7 @@ Give each router loopback 172.16.<router-number>.1/32; use R1's loopback as sour
 Capture baseline routes and probes, fail the planned physical interface, record equivalent transition windows, and restore before each repeated trial. Collect at least three trials per protocol and declare the clock/capture method. Import using router_count=12 in the V2 measurement CSV. Until built and tested in Cisco, the enterprise scenario remains model-only.
 
 The modeled route cost ends at R12. A Cisco route to its loopback may include an additional destination interface cost; report the actual routing-table metric with that distinction.
+
+## Interactive path failure
+Select a path to disrupt, select one of its links, then click Fail selected path. The button automatically plays the computed failure trace. Any WAN link exposes all 18 links. Breaking one link makes the selected route unusable; surviving links may still carry alternate traffic. The charts reflect the selected failure, even before playback starts.
+

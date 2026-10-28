@@ -26,11 +26,21 @@ def experiment(weighted,failed,parameters):
     return compare(enterprise_network(weighted,failed),horizon=horizon,rip_trigger_delay=delay,rip_periodic_interval=interval)
 
 
-def diagram(pair,baseline):
+def selectable_paths(network):
+    """Offer distinct preferred and branch routes, using actual topology edges."""
+    paths={p+' preferred route':shortest_path(network.adjacency(),'R1','R12',p) for p in ('RIP','OSPF')}
+    paths['Branch WAN route']=['R1','R4','R6','R9','R12']
+    paths['DR transit route']=['R1','R2','R7','R10','R9','R12']
+    paths['Core backup route']=['R1','R3','R5','R11','R8','R12']
+    return paths
+
+
+def diagram(pair,baseline,start_failure=False):
     net=pair['RIP']['network']
-    payload={'positions':POSITIONS,'sites':SITES,'edges':[[e.a,e.b,e.cost] for e in net.edges],'failed':list(net.failed_edge),'baseline':baseline,
+    payload={'startFailure':start_failure,'positions':POSITIONS,'sites':SITES,'edges':[[e.a,e.b,e.cost] for e in net.edges],'failed':list(net.failed_edge),'baseline':baseline,
              'traces':{p:[{k:r[k] for k in ('tick','path_nodes','delivered','reason')} for r in record['timeline']] for p,record in pair.items()}}
     page='''<!doctype html><html><meta name="viewport" content="width=device-width"><style>*{box-sizing:border-box}body{margin:0;font:13px Arial;color:#d8e7f1;background:#101e2c}.panel{border:1px solid #34495c;border-radius:15px;padding:15px}header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}button,select{background:#213849;color:#d9f4ec;border:1px solid #496677;border-radius:7px;padding:9px;cursor:pointer;transition:.2s}button:hover{transform:translateY(-3px);border-color:#78dcc6}small{margin-left:auto;color:#90a9bd;font-size:10px}svg{width:100%;height:410px;background:radial-gradient(ellipse,#1a3041,#101e2c)}.edge{stroke:#3c5369;stroke-width:2;fill:none}.router circle{fill:#1c3548;stroke:#6b91a9;stroke-width:2;transition:.2s}.router:hover circle{fill:#36605e;stroke:#78dcc6;filter:drop-shadow(0 0 6px #78dcc6)}.router{cursor:pointer}text{fill:#deedf6;text-anchor:middle;font:12px Arial}.cost{fill:#8faabc;font-size:10px}.label{fill:#8faabc;font-size:10px}.route{fill:none;stroke-width:5;stroke-dasharray:12 8;animation:flow 1s linear infinite}input{width:100%;accent-color:#78dcc6}.paths{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.paths div{border:1px solid #30495e;border-radius:8px;padding:12px;line-height:1.6}.orange{color:#f6ae73}.mint{color:#78dcc6}#inspect{color:#8faabc;font-size:11px;margin-top:10px}@keyframes flow{to{stroke-dashoffset:-40}}@media(max-width:650px){svg{height:300px}.paths{grid-template-columns:1fr}small{display:none}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style><div class="panel"><header><button id="play">▶ Play failure</button><button id="reset">↺ Baseline</button><select id="show" aria-label="Visible route"><option>Both protocols</option><option>RIP</option><option>OSPF</option></select><small>ENTERPRISE WAN / MODEL ONLY</small></header><svg viewBox="0 0 1080 480" aria-label="Twelve router enterprise WAN"><g id="edges"></g><g id="routes"></g><g id="nodes"></g></svg><input id="tick" aria-label="Enterprise playback tick" type="range" min="-1" value="-1"><div id="status">Baseline</div><div class="paths"><div class="orange" id="rip"></div><div class="mint" id="ospf"></div></div><div id="inspect">Hover over links for costs. Click a router for its role.</div></div><script>const D=__DATA__,$=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';let timer=null;function el(tag,attrs,parent){let n=document.createElementNS(NS,tag);for(let k in attrs)n.setAttribute(k,attrs[k]);parent.appendChild(n);return n}function stop(){clearInterval(timer);timer=null;$('play').textContent='▶ Play failure'}function draw(){let t=+$('tick').value;let edgeRoot=$('edges');edgeRoot.replaceChildren();D.edges.forEach(([a,b,c])=>{let p=D.positions[a],q=D.positions[b],bad=t>=0&&D.failed.includes(a)&&D.failed.includes(b);let l=el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],class:'edge',style:bad?'stroke:#f27e8d;stroke-dasharray:5 7':''},edgeRoot);el('title',{},l).textContent=a+' ↔ '+b+' · configured cost '+c+(bad?' · DOWN':'');let txt=el('text',{x:(p[0]+q[0])/2,y:(p[1]+q[1])/2-6,class:'cost'},edgeRoot);txt.textContent=c});$('routes').replaceChildren();['RIP','OSPF'].forEach(p=>{let r=t<0?{path_nodes:D.baseline[p],delivered:true,reason:'Baseline route'}:D.traces[p][t];let visible=$('show').value==='Both protocols'||$('show').value===p;if(visible){let path=r.path_nodes.map((n,i)=>(i?'L':'M')+D.positions[n].join(' ')).join(' ');el('path',{d:path,class:'route',stroke:p==='RIP'?'#f6ae73':'#78dcc6',opacity:.85,style:p==='RIP'?'stroke-width:8':'stroke-width:4'},$('routes'))}$(p.toLowerCase()).textContent=p+' · '+(r.delivered?'Delivered':'Dropped')+' · '+r.path_nodes.join(' → ')});$('status').textContent=t<0?'BASELINE · ALL LINKS AVAILABLE':'MODEL TICK '+t+' · '+D.failed.join('–')+' DOWN'}Object.entries(D.positions).forEach(([n,p])=>{let g=el('g',{class:'router',tabindex:0,role:'button','aria-label':n+' '+D.sites[n]},$('nodes'));el('circle',{cx:p[0],cy:p[1],r:22},g);el('text',{x:p[0],y:p[1]+4},g).textContent=n;el('text',{x:p[0],y:p[1]+39,class:'label'},g).textContent=D.sites[n];g.onclick=()=>$('inspect').textContent=n+' / '+D.sites[n]+' · '+D.edges.filter(e=>e[0]===n||e[1]===n).map(e=>(e[0]===n?e[1]:e[0])+' (cost '+e[2]+')').join(' · ');g.onkeydown=e=>{if(e.key==='Enter')g.onclick()}});$('tick').max=D.traces.RIP.length-1;$('tick').oninput=()=>{stop();draw()};$('show').onchange=draw;$('reset').onclick=()=>{stop();$('tick').value=-1;draw()};$('play').onclick=()=>{if(timer){stop();return}if(+$('tick').value>=+$('tick').max)$('tick').value=-1;$('play').textContent='Ⅱ Pause';timer=setInterval(()=>{if(+$('tick').value>=+$('tick').max){stop();return}$('tick').value=+$('tick').value+1;draw()},650)};draw();</script></html>'''
+    page=page.replace('draw();</script>',"draw();if(D.startFailure){$('play').click()}</script>")
     components.html(page.replace('__DATA__',json.dumps(payload)),height=660,scrolling=False)
 
 
@@ -38,8 +48,18 @@ def enterprise_lab(style,section,parameters):
     section('ENTERPRISE / PERFORMANCE ANALYSIS','Same destination. Different decisions.','12 routers · 18 WAN links · HQ, branch, core and data-center routes. Educational model; existing Cisco captures cover 5 routers.')
     a,b=st.columns(2)
     mode=a.selectbox('Controlled experiment',['WAN costs · route efficiency','Equal costs · matched failure'],key='enterprise_mode')
-    link=b.selectbox('Failed WAN link',['R2–R12','R8–R12','R5–R8','R1–R3'],key='enterprise_link')
     weighted=mode.startswith('WAN')
+    choices=selectable_paths(enterprise_network(weighted))
+    route_name=b.selectbox('Select path to disrupt',list(choices)+['Any WAN link'],key='enterprise_path')
+    chosen_path=choices.get(route_name)
+    edge_options=list(zip(chosen_path,chosen_path[1:])) if chosen_path else [(a,b) for a,b,_ in LINKS]
+    options=['–'.join(edge) for edge in edge_options]
+    # Prefer the remote link on the default legacy path, so propagation is visible.
+    link=st.selectbox('Select the link to fail on this path',options,index=min(1,len(options)-1),key='enterprise_link')
+    if chosen_path:
+        st.code(' → '.join(chosen_path),language='text')
+    apply=st.button('↯ Fail selected path',key='enterprise_apply_failure',type='primary')
+    st.caption('A route becomes unavailable when one of its links fails. This control breaks the selected link; the other links stay available for alternate routing. Charts show the selected failure scenario; press the button to play it.')
     failed=tuple(link.split('–'))
     pair=experiment(weighted,failed,parameters)
     network=pair['RIP']['network']
@@ -49,7 +69,8 @@ def enterprise_lab(style,section,parameters):
     cols[1].metric('OSPF baseline hops',len(baseline['OSPF'])-1)
     cols[2].metric('RIP baseline path cost',path_cost(network,baseline['RIP']))
     cols[3].metric('OSPF baseline path cost',path_cost(network,baseline['OSPF']))
-    diagram(pair,baseline)
+    diagram(pair,baseline,start_failure=apply)
+    if apply:st.success(f'{link} failed in the model. Playback now follows the actual recomputed forwarding trace for both protocols.')
     if weighted:
         st.info('RIP chooses the 2-hop legacy WAN (cost 24). OSPF chooses the 4-hop core path (cost 8). Costs are configured values, not measured latency. A failed link can affect one selected route and leave the other unaffected.')
     else:
