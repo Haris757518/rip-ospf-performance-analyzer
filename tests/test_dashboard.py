@@ -6,43 +6,34 @@ from streamlit.testing.v1 import AppTest
 APP = Path(__file__).resolve().parents[1] / 'dashboard' / 'app.py'
 
 
-def test_dashboard_filters_recorded_results():
-    app = AppTest.from_file(str(APP)).run(timeout=30)
+def test_dashboard_uses_only_enterprise_views():
+    app=AppTest.from_file(str(APP)).run(timeout=30)
     assert not app.exception
-    assert len(app.tabs) == 7
-    assert len(app.get('plotly_chart')) == 12
+    assert len(app.tabs)==5
+    assert all('Failure Lab' not in tab.label and 'Routing Lab' not in tab.label for tab in app.tabs)
+    assert any('No Cisco results recorded for the 12-router' in item.value for item in app.info)
     app.radio(key='performance_scenario').set_value('Restored').run(timeout=30)
     assert not app.exception
-    assert any('No packet probe' in item.value for item in app.info)
-    routes = [item.value for item in app.markdown if 'route-row' in item.value and 'style=' in item.value]
-    assert len(routes) == 1
-    assert 'OSPF' in routes[0] and 'R1 → R2 → R4' in routes[0]
-    app.radio(key='performance_scenario').set_value('Link failure').run(timeout=30)
+    assert not any('route-row' in item.value and '<strong>R1' in item.value for item in app.markdown)
+
+
+def test_cisco_launch_targets_enterprise_project():
+    app=AppTest.from_file(str(APP)).run(timeout=30)
+    file=APP.parents[1]/'Enterprise_RIP_Experiment.pkt'
+    if not file.exists():
+        assert app.button(key='open_RIP').disabled
+    else:
+        with patch('subprocess.Popen') as launch:
+            app.button(key='open_RIP').click().run(timeout=30)
+            assert not app.exception
+            assert Path(launch.call_args.args[0][1]).name==file.name
+
+
+def test_shared_enterprise_settings_and_scaling_controls():
+    app=AppTest.from_file(str(APP)).run(timeout=30)
+    app.slider(key='model_delay').set_value(4).run(timeout=30)
     assert not app.exception
-    routes = [item.value for item in app.markdown if 'route-row' in item.value and 'style=' in item.value]
-    assert len(routes) == 2
-    assert all('R1 → R3 → R5 → R4' in row for row in routes)
-
-
-def test_cisco_launch_uses_saved_project():
-    app = AppTest.from_file(str(APP)).run(timeout=30)
-    assert not app.button(key='open_RIP').disabled
-    with patch('subprocess.Popen') as launch:
-        app.button(key='open_RIP').click().run(timeout=30)
-        assert not app.exception
-        args = launch.call_args.args[0]
-        assert Path(args[0]).name == 'PacketTracer.exe'
-        assert Path(args[1]).name == 'RIP_Experiment.pkt'
-        assert Path(args[1]).exists()
-
-
-
-def test_model_state_and_scaling_controls():
-    app = AppTest.from_file(str(APP)).run(timeout=30)
-    app.radio(key='failure_protocol').set_value('OSPF')
-    app.slider(key='failure_tick').set_value(4).run(timeout=30)
-    assert not app.exception
-    assert any('Probe delivered' in item.value for item in app.success)
+    assert app.multiselect(key='scale_sizes').options==['12','16','20','28','36']
     app.multiselect(key='scale_sizes').set_value([]).run(timeout=30)
     assert not app.exception
     assert any('Choose at least one' in item.value for item in app.info)
@@ -55,11 +46,11 @@ def test_enterprise_path_failure_selection():
     app = AppTest.from_file(str(APP)).run(timeout=30)
     app.selectbox(key='enterprise_path').set_value('R1 → R3 → R5 → R11 → R8 → R12').run(timeout=30)
     assert not app.exception
-    assert 'R5–R11' in app.selectbox(key='enterprise_link').options
-    assert 'R2–R12' not in app.selectbox(key='enterprise_link').options
-    app.selectbox(key='enterprise_link').set_value('R5–R11')
+    assert 'R5–R11' in app.multiselect(key='enterprise_links').options
+    assert 'R2–R12' not in app.multiselect(key='enterprise_links').options
+    app.multiselect(key='enterprise_links').set_value(['R5–R11','R11–R8']).run(timeout=30)
     app.button(key='enterprise_apply_failure').click().run(timeout=30)
     assert not app.exception
-    assert any('R5–R11 is broken in the simulation' in x.value for x in app.success)
+    assert any('Broken together: R5–R11, R11–R8' in x.value for x in app.success)
     app.selectbox(key='enterprise_path').set_value('All links').run(timeout=30)
-    assert len(app.selectbox(key='enterprise_link').options)==18
+    assert len(app.multiselect(key='enterprise_links').options)==18

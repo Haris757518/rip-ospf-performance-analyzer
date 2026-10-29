@@ -31,6 +31,11 @@ class Network:
     destination: str
     failed_edge: tuple[str, str]
     label: str
+    failed_edges: tuple[tuple[str, str], ...] | None = None
+
+    @property
+    def failures(self):
+        return tuple(sorted({tuple(sorted(e)) for e in (self.failed_edges if self.failed_edges is not None else (self.failed_edge,))}))
 
     @property
     def nodes(self) -> list[str]:
@@ -175,8 +180,9 @@ def run_experiment(network: Network, protocol: str, *, horizon=48,
     if horizon<8 or rip_periodic_interval<1 or rip_trigger_delay<1:
         raise ValueError('Invalid model parameters')
     original=network.adjacency()
-    physical=network.adjacency(excluded=[network.failed_edge])
-    if tuple(sorted(network.failed_edge)) not in {e.key for e in network.edges}:
+    failures=network.failures
+    physical=network.adjacency(excluded=failures)
+    if any(e not in {edge.key for edge in network.edges} for e in failures):
         raise ValueError('Failed link is not in network')
     nodes=network.nodes
     queue=[];sequence=0;event_count=0
@@ -196,9 +202,11 @@ def run_experiment(network: Network, protocol: str, *, horizon=48,
             key=(router,t+rip_trigger_delay)
             if key not in scheduled:
                 scheduled.add(key);put(t+rip_trigger_delay,'send',router,'triggered')
-        for end in network.failed_edge:
-            other=next(x for x in network.failed_edge if x!=end)
-            heard[end].pop(other,None)
+        endpoints=sorted({end for edge in failures for end in edge})
+        for a,b in failures:
+            heard[a].pop(b,None)
+            heard[b].pop(a,None)
+        for end in endpoints:
             updated=new_rip_vector(end,physical,heard,nodes)
             recalcs+=1
             if updated!=vectors[end]:
@@ -209,14 +217,16 @@ def run_experiment(network: Network, protocol: str, *, horizon=48,
     else:
         knowledge={node:set() for node in nodes}
         known_routes={node: next_hops(original,'OSPF')[node] for node in nodes}
-        changed_edge=tuple(sorted(network.failed_edge))
-        for end in network.failed_edge:
-            knowledge[end].add(changed_edge)
+        for changed_edge in failures:
+            for end in changed_edge:
+                knowledge[end].add(changed_edge)
+        for end in sorted({node for edge in failures for node in edge}):
             known_routes[end]=next_hops(network.adjacency(excluded=knowledge[end]),'OSPF')[end]
             recalcs+=1
-            for nb in physical[end]:
-                put(1,'lsa',nb,(end,changed_edge))
-                messages+=1;lsa_messages+=1
+            for changed_edge in sorted(knowledge[end]):
+                for nb in physical[end]:
+                    put(1,'lsa',nb,(end,changed_edge))
+                    messages+=1;lsa_messages+=1
 
     timeline=[]
     for tick in range(horizon+1):
@@ -278,7 +288,7 @@ def run_experiment(network: Network, protocol: str, *, horizon=48,
     drop=sum(not p['delivered'] for p in timeline)
     summary={
         'protocol':protocol,'routers':len(nodes),'edges':len(network.edges),
-        'topology':network.label,'failed_link':'–'.join(network.failed_edge),
+        'topology':network.label,'failed_link':', '.join('–'.join(edge) for edge in failures),
         'convergence_ticks':convergence,'lost_probes':drop,
         'delivered_probes':len(timeline)-drop,'probe_count':len(timeline),
         'delivery_percent':round(100*(len(timeline)-drop)/len(timeline),1),

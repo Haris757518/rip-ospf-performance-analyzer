@@ -17,7 +17,7 @@ COLORS={'RIP':'#f6ae73','OSPF':'#78dcc6'}
 LABELS={'baseline':'Baseline','failover':'Link failure','recovery':'Restored','cost_demo':'Cost demo'}
 
 from measurements import read_data
-from labs import settings, failure_lab, scaling_lab, decisions_lab
+from labs import settings, scaling_lab, decisions_lab
 from enterprise import enterprise_lab
 
 def style_chart(fig):
@@ -27,32 +27,32 @@ def style_chart(fig):
 def section(kicker,title,detail=''):
     st.markdown(f'<div class="section-head"><span>{kicker}</span><h3>{title}</h3><p>{detail}</p></div>',unsafe_allow_html=True)
 
-data=read_data(ROOT/'data/measured_results.csv')
+data=read_data(ROOT/'data/enterprise_measured_results.csv')
 st.markdown('''<div class="masthead"><div class="brand"><b>◈</b> ROUTE<span>LAB</span><i>NETWORK SYSTEMS / ENTERPRISE</i></div><div class="status"><em></em> CISCO EXPERIMENTS SAVED</div></div><div class="hero"><div class="eyebrow">COMPUTER NETWORKS · PROTOCOL BENCHMARK</div><h1>Performance analysis<span>RIP <i>versus</i> OSPF.</span></h1><p>One network. Two routing strategies. See the difference.</p><div class="hero-orbit">◎</div></div>''',unsafe_allow_html=True)
-enterprise,failure,lab,scaling,decisions,performance,cisco=st.tabs(['◈ Enterprise WAN','↯ Failure Lab','◈ Routing Lab','↗ Scalability','◇ Decisions','▥ Cisco Results','↗ Cisco Workspace'])
-with failure:
-    parameters=settings()
-    failure_lab(style_chart,section,parameters)
+enterprise,scaling,decisions,performance,cisco=st.tabs(['◈ Enterprise WAN','↗ Scalability','◇ Decisions','▥ Cisco Results','↗ Cisco Workspace'])
 with enterprise:
+    parameters=settings()
     enterprise_lab(style_chart,section,parameters)
 with scaling:
     scaling_lab(style_chart,section,parameters)
 with decisions:
     decisions_lab(style_chart,section,parameters)
-with lab:
-    st.markdown('''<div class="stat-strip"><div><small>TOPOLOGY</small><strong>05 <span>routers</span></strong><b>02 LANs · 09 links</b></div><div><small>BACKUP PATH</small><strong>03 <span>hops</span></strong><b>Verified in Packet Tracer</b></div><div><small>SETTLED DELIVERY</small><strong>100<span>%</span></strong><b>4/4 packets per probe</b></div><div><small>CISCO CHECKS</small><strong>05 <span>runs</span></strong><b>Single verification per state</b></div></div>''',unsafe_allow_html=True)
-    section('01 / INTERACTIVE NETWORK','Follow the packet.','Switch protocols, break the upper link, or inspect a router.')
-    components.html((ROOT/'dashboard/topology.html').read_text(encoding='utf-8'),height=750,scrolling=False)
-    st.markdown('<div class="footnote"><span class="mint">●</span> Animated route model · Recorded Cisco results in Performance · No live telemetry connection</div>',unsafe_allow_html=True)
 with performance:
-    section('02 / MEASURED PERFORMANCE','Evidence, at a glance.','Cisco Packet Tracer observations. Hover over a graph to inspect the probe.')
+    section('02 / MEASURED PERFORMANCE','Evidence, at a glance.','Results for the same 12-router enterprise network. Actual captures only.')
+    if data.empty:
+        st.info('No Cisco results recorded for the 12-router network yet. The enterprise graphs use simulation results.')
+    with st.expander('Previous 5-router tests · archive'):
+        st.caption('These belong to the old network and are not enterprise results.')
+        st.download_button('Download old Cisco results',(ROOT/'data/measured_results.csv').read_bytes(),file_name='archived_5_router_results.csv')
     with st.expander('Import your next experiment'):
         uploaded=st.file_uploader('Results CSV',type='csv',key='results_upload')
         st.download_button('Download blank worksheet',(ROOT/'data/results_template.csv').read_bytes(),file_name='results_template.csv',mime='text/csv')
         st.download_button('Download V2 measurement sheet',(ROOT/'data/MEASURED_PACKET_TRACER_BLANK.csv').read_bytes(),file_name='MEASURED_PACKET_TRACER_BLANK.csv',mime='text/csv')
         st.caption('Both CSV formats accepted. V2 milliseconds convert to seconds; capture methods and network sizes stay separate.')
     if uploaded is not None:
-        try: data=read_data(uploaded)
+        try:
+            data=read_data(uploaded)
+            if not data.empty and not (data.router_count==12).all():raise ValueError('Use router_count=12 for this enterprise dashboard. Keep old network results in the archive.')
         except (ValueError,pd.errors.ParserError,UnicodeDecodeError,OverflowError) as exc:
             st.error(str(exc));st.stop()
     if data.router_count.nunique()>1:
@@ -115,23 +115,26 @@ with cisco:
     for column,protocol in zip(st.columns(2),('RIP','OSPF')):
         with column:
             with st.container(border=True):
-                st.markdown(f'<div class="project-card"><small>CISCO PACKET TRACER</small><h2 style="color:{COLORS[protocol]}">{protocol}<span> experiment</span></h2><p>5 routers · 2 LANs · baseline + backup path</p></div>',unsafe_allow_html=True)
-                file=ROOT/f'{protocol}_Experiment.pkt'
+                st.markdown(f'<div class="project-card"><small>CISCO PACKET TRACER</small><h2 style="color:{COLORS[protocol]}">{protocol}<span> experiment</span></h2><p>12 routers · 18 links · same enterprise network</p></div>',unsafe_allow_html=True)
+                file=ROOT/f'Enterprise_{protocol}_Experiment.pkt'
                 if st.button(f'↗ Open {protocol} in Cisco',key=f'open_{protocol}',use_container_width=True,disabled=not(file.exists() and tracer.exists())):
                     try:
                         subprocess.Popen([str(tracer),str(file)],cwd=str(ROOT))
                         st.success(f'{protocol} experiment sent to Packet Tracer.')
                     except OSError as exc: st.error(f'Could not open Packet Tracer: {exc}')
+                if not file.exists(): st.caption('Enterprise Cisco build pending. The old five-router file is kept in the archive.')
                 if file.exists(): st.download_button(f'↓ Download {protocol} .pkt',file.read_bytes(),file_name=file.name,key=f'download_{protocol}',use_container_width=True)
-    section('CONSOLE EVIDENCE','Inspect the proof.')
-    evidence=sorted((ROOT/'experiments/evidence').glob('*.txt'))
-    chosen=st.selectbox('Recorded Cisco console',evidence,format_func=lambda p:p.stem.replace('_',' '),key='evidence_file')
-    with st.expander('View console output'): st.code(chosen.read_text(encoding='utf-8'),language='text')
-    with st.expander('Router configuration files'):
-        protocol=st.selectbox('Configuration protocol',['RIP','OSPF'],key='config_protocol')
-        router=st.selectbox('Router',['R1','R2','R3','R4','R5'],key='config_router')
-        st.code((ROOT/'configs/paste_ready'/f'{router}_{protocol}_COMPLETE.txt').read_text(encoding='utf-8'),language='text')
-    st.markdown('<div class="footnote">NEXT / Repeat 3 trials · Capture convergence timestamps · Separate cost demonstration</div>',unsafe_allow_html=True)
+    with st.expander('Enterprise link and addressing plan'):
+        st.dataframe(pd.read_csv(ROOT/'docs/ENTERPRISE_WAN_LINK_PLAN.csv'),hide_index=True)
+        st.download_button('Download link plan',(ROOT/'docs/ENTERPRISE_WAN_LINK_PLAN.csv').read_bytes(),file_name='ENTERPRISE_WAN_LINK_PLAN.csv')
+    with st.expander('Archived 5-router Cisco projects and evidence'):
+        st.caption('Original verified testbed. Kept for reference, separate from the enterprise network.')
+        for protocol in ('RIP','OSPF'):
+            old=ROOT/f'{protocol}_Experiment.pkt'
+            st.download_button(f'Download archived {protocol}',old.read_bytes(),file_name=old.name,key=f'archive_{protocol}')
+        evidence=sorted((ROOT/'experiments/evidence').glob('*.txt'))
+        chosen=st.selectbox('Old console capture',evidence,format_func=lambda p:p.stem.replace('_',' '),key='evidence_file')
+        st.code(chosen.read_text(encoding='utf-8'),language='text')
 st.markdown('<div class="footer"><b>◈ ROUTELAB</b><span>DISTANCE VECTOR & LINK STATE ROUTING</span><i>RIPv2 / OSPFv2</i></div>',unsafe_allow_html=True)
 
 

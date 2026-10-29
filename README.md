@@ -97,3 +97,10 @@ The default Enterprise WAN view now compares 12 routers over 18 redundant links.
 
 
 
+
+## Simultaneous link failures
+
+In Enterprise WAN, select one or more router links under Choose links to break together, then press Break selected links. All selected links fail at step zero. Both protocols run against the same combined failure, and every selected link is marked red during playback. An empty selection previews a healthy network. If the failures isolate R1 or R12, the dashboard reports that no working path was restored. All 41 automated tests pass.
+
+The dashboard now uses five views: Enterprise WAN, Scalability, Decisions, Cisco Results and Cisco Workspace. Scalability extends the same 12-router network; Decisions uses its R1-to-R12 routes. Older five-router Cisco files and results are archived separately. Enterprise Cisco implementation was skipped at the user's request.
+

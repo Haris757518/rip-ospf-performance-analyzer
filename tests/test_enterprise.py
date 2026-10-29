@@ -31,3 +31,35 @@ def test_failure_of_unused_legacy_link_does_not_drop_ospf_probes():
     pair=compare(enterprise_network())
     assert pair['OSPF']['summary']['lost_probes']==0
     assert pair['RIP']['summary']['lost_probes']>0
+
+
+def test_scaled_network_preserves_enterprise_links_and_endpoints():
+    from enterprise import expanded_enterprise_network
+    original=enterprise_network(False)
+    for size in (12,16,20,28,36):
+        net=expanded_enterprise_network(size)
+        assert len(net.nodes)==size
+        assert all(edge in net.edges for edge in original.edges)
+        assert (net.source,net.destination,net.failed_edge)==('R1','R12',('R2','R12'))
+
+
+def test_simultaneous_failures_never_forward_on_broken_links():
+    net=enterprise_network(False,(('R2','R12'),('R8','R12')))
+    assert len(net.failures)==2
+    for result in compare(net).values():
+        assert result['timeline'][-1]['delivered']
+        for point in result['timeline']:
+            assert all(tuple(sorted((a,b))) not in net.failures for a,b in zip(point['path_nodes'],point['path_nodes'][1:]))
+
+
+def test_multiple_breaks_can_disconnect_source():
+    net=enterprise_network(False,(('R1','R2'),('R1','R3'),('R1','R4')))
+    for result in compare(net).values():
+        assert result['summary']['convergence_ticks'] is None
+        assert result['summary']['lost_probes']==result['summary']['probe_count']
+
+
+def test_empty_failure_selection_keeps_everything_working():
+    for result in compare(enterprise_network(False,())).values():
+        assert result['summary']['lost_probes']==0
+        assert result['summary']['control_messages']>=0
